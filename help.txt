@@ -1,0 +1,12 @@
+commandes:
+esc = stop
+fleches et o/p = rotations
+w/s = point focal
+space/maj = hauteure
+1 = var 1
+2 = var 5
+3 = var 10
+4 = var 50
+5 = var 100
+6 = var 500
+r = reload
