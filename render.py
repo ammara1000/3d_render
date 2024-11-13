@@ -135,6 +135,22 @@ def polygone_3d(coords):
     for i in coords:
         t.goto(dot_3d(rot_3d((i),rot),focal_point,proj))
         t.dot(0.0001)
+def space_plan(func,step,size):
+    data=[]
+    for i in range(-size,size):
+        temp_data=[]
+        for j in range(-size,size):
+            x=step*i
+            y=step*j
+            z=eval(func+"(x,y,step)")
+            temp_data.append([x,y,z])
+        data.append(temp_data)      
+    for i in range(1,(2*size)-1):
+        for j in range(2*size):
+            if data[i-1][j][2]!=None and data[i][j][2]!=None:
+                line_3d([data[i-1][j],data[i][j]])
+            if data[j][i-1][2]!=None and data[j][i][2]!=None:
+                line_3d([data[j][i-1],data[j][i]])
 def r():
     return (random.randint(-150,150),random.randint(-150,150))
 def r_3d():
@@ -169,6 +185,8 @@ def rot_3d(coords, rot):
     z3 = z2
     return (x3, y3, z3)
 def render(shape):
+    global w
+    global rot
     for i in shape:
         if i[0]=="line":
             line(i[1])
@@ -192,10 +210,27 @@ def render(shape):
             t.begin_fill()
         elif i[0]=="end_fill":
             t.end_fill()
+        elif i[0]=="plan":
+            space_plan(i[1][0],i[1][1],i[1][2])
+        elif i[0]=="rot":
+            rot=i[1]
 focal_point=750#---------------------------
 proj=1500#-----------------------------------
 rot=(0,0,0)#--------------------------------
 pos=(0,0,0)#------------------------------
+def plan_def(x,y,step):
+    c=0
+    a=complex(x,0)
+    b=complex(0,y)
+    z_=(e**(a))*(e**(b))
+    z=z_.real
+    if z.imag < c-step and z.imag >= c+step:
+        return z
+    else:
+        return None
+def plan_0(x,y,step):
+    z=0
+    return z
 def F5_shape(focal_point,proj,rot):
     #shape=[
     #    ["color", "blue"],
