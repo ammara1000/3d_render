@@ -1,50 +1,147 @@
-from turtle import *
+import turtle
 import random
 import time
 from math import *
 import json
-ht()
+import tkinter as tk
+from tkinter import ttk
+root = tk.Tk()
+root.title("3d render")
+root.geometry("800x600")
+root.configure(bg="black")
+canvas_frame = ttk.Frame(root)
+canvas_frame.grid(row=0, column=0, sticky="nsew")
+canvas = turtle.ScrolledCanvas(canvas_frame, width=600, height=600)
+canvas.pack(fill="both", expand=True)
+debug_frame = ttk.Frame(root, width=200)
+debug_frame.grid(row=0, column=1, sticky="nsew")
+debug_text = tk.Text(debug_frame, wrap="word", state="disabled", width=30, bg="black", fg="#00EE00")
+debug_text.pack(fill="both", expand=True)
+input_text = tk.Entry(debug_frame, width=30, bg="black", font=("Courier", 12), fg="#00EE00")
+input_text.pack(fill="x", pady=10)
+root.columnconfigure(0, weight=3)
+root.columnconfigure(1, weight=1)
+root.rowconfigure(0, weight=1)
+screen = turtle.TurtleScreen(canvas)
+screen.bgcolor("white")
+t = turtle.RawTurtle(screen)
+def debug(message):
+    debug_text.config(state="normal")
+    debug_text.insert("end", message + "\n")
+    debug_text.config(state="disabled")
+    debug_text.see("end")
+def submit_input():
+    user_input = input_text.get()
+    with open("key.txt", 'w') as log_file:
+            log_file.write(user_input)
+    input_text.delete(0, 'end')
+submit_button = ttk.Button(debug_frame, text="Envoyer", command=submit_input)
+submit_button.pack(pady=5)
+def look_key():
+    global key
+    with open('key.txt', 'r') as file:
+        key = file.readline().strip()
+        if key!="":
+            debug(key)
+def clear_key():
+    with open("key.txt", "w") as file:
+        pass
+var=10
+def run_key():
+    look_key()
+    global focal_point
+    global rot
+    global pos
+    global var
+    if key=="haut":
+        rot=(rot[0]-var,rot[1],rot[2])
+    if key=="bas":
+        rot=(rot[0]+var,rot[1],rot[2])
+    if key=="droite":
+        rot=(rot[0],rot[1]+var,rot[2])
+    if key=="gauche":
+        rot=(rot[0],rot[1]-var,rot[2])
+    if key=="o":
+        rot=(rot[0],rot[1],rot[2]+var)
+    if key=="p":
+        rot=(rot[0],rot[1],rot[2]-var)
+    if key=="space":
+        pos=(pos[0],pos[1]+var,pos[2])
+    if key=="maj":
+        pos=(pos[0],pos[1]-var,pos[2])
+    if key=="w":
+        focal_point+=-var
+    if key=="s":
+        focal_point+=var
+    if key=="r":
+        screen.update()
+        root.update()
+    if key=="1":
+        var=1
+    if key=="2":
+        var=5
+    if key=="3":
+        var=10
+    if key=="4":
+        var=50
+    if key=="5":
+        var=100
+    if key=="6":
+        var=500
+    if key=="esc":
+        clear_key()
+        1/0,"var:",var
+    clear_key()
+    if key != "":
+        debug(str(focal_point)+" rot:"+str(rot)+" pos:"+str(pos)+" var:"+str(var))
+    if key in ["haut","bas","gauche","droite","o","p","space","maj","w","s"]:
+        return "skip"
+t.ht()
+t.color("#880000")
 w=0.5
-width(w)
-speed(0)
+t.width(w)
+t.speed(0)
 def dot_(coords):
-    up()
-    goto(coords)
-    down()
-    dot(w)
+    t.up()
+    t.goto(coords)
+    t.down()
+    t.dot(w)
 def dot_3d_(coords):
-    up()
-    goto(dot_3d(rot_3d((coords),rot),focal_point,proj))
-    down()
-    dot(w)
+    t.up()
+    t.goto(dot_3d(rot_3d((coords),rot),focal_point,proj))
+    t.down()
+    t.dot(w)
 def line(coords):
-    up()
-    goto(coords[0])
-    down()
-    goto(coords[1])
+    t.up()
+    t.goto(coords[0])
+    t.down()
+    t.goto(coords[1])
 def line_3d(coords):
-    up()
-    goto(dot_3d(rot_3d((coords[0]),rot),focal_point,proj))
-    down()
-    goto(dot_3d(rot_3d((coords[1]),rot),focal_point,proj))
+    t.up()
+    t.goto(dot_3d(rot_3d((coords[0]),rot),focal_point,proj))
+    t.down()
+    t.goto(dot_3d(rot_3d((coords[1]),rot),focal_point,proj))
+    t.dot(0.0001)
 def polygone(coords):
-    up()
-    goto(coords[0])
-    down()
+    t.up()
+    t.goto(coords[0])
+    t.down()
     for i in coords:
-        goto(i)
+        t.goto(i)
 def polygone_3d(coords):
-    up()
-    goto(dot_3d(rot_3d((coords[0]),rot),focal_point,proj))
-    down()
+    t.up()
+    t.goto(dot_3d(rot_3d((coords[0]),rot),focal_point,proj))
+    t.down()
     for i in coords:
-        goto(dot_3d(rot_3d((i),rot),focal_point,proj))
+        t.goto(dot_3d(rot_3d((i),rot),focal_point,proj))
+        t.dot(0.0001)
 def r():
     return (random.randint(-150,150),random.randint(-150,150))
 def r_3d():
     return (random.randint(-150,150),random.randint(-150,150),random.randint(-150,150))
 
 def dot_3d(coords_3d,focal_point,proj=1.5):
+    coords_3d=(pos[0]+coords_3d[0],pos[1]+coords_3d[1],pos[2]+coords_3d[2])
     if coords_3d[2]==focal_point:
         focal_point+=1
     coef=-(proj/(coords_3d[2]-focal_point))
@@ -76,7 +173,7 @@ def render(shape):
         if i[0]=="line":
             line(i[1])
         elif i[0]=="color":
-            color(i[1])
+            t.color(i[1])
         elif i[0]=="polygone":
             polygone(i[1])
         elif i[0]=="dot":
@@ -89,15 +186,16 @@ def render(shape):
             line_3d(i[1])
         elif i[0]=="width":
             w=i[1],
-            width(w)
+            t.width(w)
         elif i[0]=="start_fill":
-            fillcolor(i[1])
-            begin_fill()
+            t.fillcolor(i[1])
+            t.begin_fill()
         elif i[0]=="end_fill":
-            end_fill()
-focal_point=-5#---------------------------
-proj=1000#-----------------------------------
-rot=(20,0,180)#--------------------------------
+            t.end_fill()
+focal_point=750#---------------------------
+proj=1500#-----------------------------------
+rot=(0,0,0)#--------------------------------
+pos=(0,0,0)#------------------------------
 def F5_shape(focal_point,proj,rot):
     #shape=[
     #    ["color", "blue"],
@@ -115,15 +213,21 @@ def F5_shape(focal_point,proj,rot):
 shape=F5_shape(focal_point,proj,rot)
 def rotate_shape():
     while True:
-        for i in range(0,360,20):
-            global rot
-            global focal_point
-            global proj
-            rot=(rot[0],i+1,180)
-            shape=F5_shape(focal_point,proj,rot)
-            render(shape)
-            time.sleep(0.5)
-            clear()
+        screen.bgcolor("#000000")
+        shape=F5_shape(focal_point,proj,rot)
+        screen.tracer(0)
+        render(shape)
+        screen.update()
+        root.update()
+        debug("done")
+        while True:
+            skip=run_key()
+            root.update()
+            if skip=="skip":
+                break
+        screen.clear()
+        screen.bgcolor("#000000")
 rotate_shape()
 #render(shape)
-done()
+debug("done")
+turtle.done()
