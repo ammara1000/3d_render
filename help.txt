@@ -3,6 +3,7 @@ esc = stop
 fleches et o/p = rotations
 w/s = point focal
 space/maj = hauteure
+c/v = misk
 1 = var 1
 2 = var 5
 3 = var 10
