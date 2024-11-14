@@ -1,6 +1,7 @@
 import turtle
 import random
 import time
+import cmath
 from math import *
 import json
 import tkinter as tk
@@ -47,12 +48,14 @@ def clear_key():
     with open("key.txt", "w") as file:
         pass
 var=10
+misk=0
 def run_key():
     look_key()
     global focal_point
     global rot
     global pos
     global var
+    global misk
     if key=="haut":
         rot=(rot[0]-var,rot[1],rot[2])
     if key=="bas":
@@ -76,6 +79,8 @@ def run_key():
     if key=="r":
         screen.update()
         root.update()
+    if key=="0":
+        var=0.1
     if key=="1":
         var=1
     if key=="2":
@@ -88,13 +93,17 @@ def run_key():
         var=100
     if key=="6":
         var=500
+    if key=="c":
+        misk+=-var
+    if key=="v":
+        misk+=var
     if key=="esc":
         clear_key()
         1/0,"var:",var
     clear_key()
     if key != "":
-        debug(str(focal_point)+" rot:"+str(rot)+" pos:"+str(pos)+" var:"+str(var))
-    if key in ["haut","bas","gauche","droite","o","p","space","maj","w","s"]:
+        debug(str(focal_point)+" rot:"+str(rot)+" pos:"+str(pos)+" var:"+str(var)+" misk:"+str(misk))
+    if key in ["haut","bas","gauche","droite","o","p","space","maj","w","s","c","v"]:
         return "skip"
 t.ht()
 t.color("#880000")
@@ -135,22 +144,34 @@ def polygone_3d(coords):
     for i in coords:
         t.goto(dot_3d(rot_3d((i),rot),focal_point,proj))
         t.dot(0.0001)
-def space_plan(func,step,size):
+def space_plan(func,step,size,arg=None):
     data=[]
     for i in range(-size,size):
         temp_data=[]
         for j in range(-size,size):
             x=step*i
             y=step*j
-            z=eval(func+"(x,y,step)")
+            z=eval(func+"(x,y,step,arg)")
             temp_data.append([x,y,z])
         data.append(temp_data)      
     for i in range(1,(2*size)-1):
         for j in range(2*size):
-            if data[i-1][j][2]!=None and data[i][j][2]!=None:
+            a_=data[i-1][j][2]!=None
+            b_=data[i][j][2]!=None
+            c_=data[j][i-1][2]!=None
+            d_=data[j][i][2]!=None
+            if a_ and b_:
                 line_3d([data[i-1][j],data[i][j]])
-            if data[j][i-1][2]!=None and data[j][i][2]!=None:
+            # elif a_:
+                # line_3d([data[i-1][j],data[i-1][j]])
+            # elif b_:
+                # line_3d([data[i][j][2],data[i][j][2]])
+            if c_ and d_:
                 line_3d([data[j][i-1],data[j][i]])
+            # elif c_:
+                # line_3d([data[j][i-1][2],data[j][i-1][2]])
+            # elif d_:
+                # line_3d([data[j][i][2],data[j][i][2]])
 def r():
     return (random.randint(-150,150),random.randint(-150,150))
 def r_3d():
@@ -186,6 +207,7 @@ def rot_3d(coords, rot):
     return (x3, y3, z3)
 def render(shape):
     global w
+    global focal_point
     global rot
     for i in shape:
         if i[0]=="line":
@@ -211,24 +233,71 @@ def render(shape):
         elif i[0]=="end_fill":
             t.end_fill()
         elif i[0]=="plan":
-            space_plan(i[1][0],i[1][1],i[1][2])
+            space_plan(i[1][0],i[1][1],i[1][2],misk)#misk spetific
         elif i[0]=="rot":
             rot=i[1]
+        elif i[0]=="f_point":
+            focal_point=i[1]
 focal_point=750#---------------------------
 proj=1500#-----------------------------------
 rot=(0,0,0)#--------------------------------
 pos=(0,0,0)#------------------------------
-def plan_def(x,y,step):
-    c=0
-    a=complex(x,0)
-    b=complex(0,y)
-    z_=(e**(a))*(e**(b))
+def plan_def(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    z_=cmath.exp(ab)
     z=z_.real
-    if z.imag < c-step and z.imag >= c+step:
+    if z_.imag >= c-(var/2) and z_.imag < c+(var/2):
         return z
     else:
         return None
-def plan_0(x,y,step):
+def plan_def1(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    z_=cmath.exp(ab)
+    z=z_.real
+    if misk >= 0 and abs(z)<20:
+        return z
+def plan_def2(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    z_=cmath.exp(ab)
+    z=z_.imag
+    if misk <= 0 and abs(z)<20:
+        return z
+def plan_def_log(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    try:
+        z_=cmath.log(ab)
+    except:
+        return None
+    z=z_.real
+    if z_.imag >= c-(var/2) and z_.imag < c+(var/2):
+        return z
+    else:
+        return None
+def plan_def1_log(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    try:
+        z_=cmath.log(ab)
+    except:
+        return None
+    z=z_.real
+    if misk >= 0 and abs(z)<20:
+        return z
+def plan_def2_log(x,y,step,arg):
+    c=arg
+    ab=complex(x,y)
+    try:
+        z_=cmath.log(ab)
+    except:
+        return None
+    z=z_.imag
+    if misk <= 0 and abs(z)<20:
+        return z
+def plan_0(x,y,step,arg):
     z=0
     return z
 def F5_shape(focal_point,proj,rot):
