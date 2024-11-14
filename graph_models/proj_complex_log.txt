@@ -1,0 +1,1 @@
+[["f_point",75],["width",1],["rot",[-60,-30,-15]],["color", "#aa0000"],["plan",["plan_0",1,10]],["color", "#00FF00"],["plan",["plan_def1_log",0.4,25]],["color", "#0000FF"],["plan",["plan_def2_log",0.4,25]]]
